@@ -2,6 +2,11 @@
 ### helps in fethching, installation and configuration of netMHCIIpan
 
 GetNetMHCIIpan <- function() {
+  # checking if the user performed the function call from Linux
+  if(Sys.info()['sysname'] != "Linux") {
+    stop("Installation is only available on Linux systems!")
+  }
+  
   # checking if tcsh is installed on the Linux system (dependency of netMHCIIpan 4.0)
   if(class(try(system("command -v tcsh", intern = T), silent = T)) == "try-error") {
     stop("Installation failed: tcsh is not installed on this Linux system.\nPlease use your system package manager (apt, yum..) to download tcsh!")
@@ -25,7 +30,7 @@ GetNetMHCIIpan <- function() {
   download.file(paste0(ftplink, "/netMHCIIpan-4.0.Linux.tar.gz"), destfile = paste0(download_path, "/netmhcIIpan.tar.gz"))
   
   # extracting main archive
-  install_path <- readline("Set the installation directory: ")
+  install_path <- readline("Set the installation directory, where you would like your 'netMHCIIpan' directory to reside:")
   suppressWarnings(dir.create(install_path, recursive = T))
   system(paste0("tar -xf ",  download_path, "/netmhcIIpan.tar.gz -C ", install_path))
   message(paste0("Succesfully uncompressed archive to ", install_path))
