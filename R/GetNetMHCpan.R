@@ -1,3 +1,5 @@
+#' @export
+
 ### GetNetMHCpan function
 ### helps in fethching, installation and configuration of netMHCpan
 

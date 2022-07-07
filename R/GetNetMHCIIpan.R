@@ -1,3 +1,5 @@
+#' @export
+
 ### GetNetMHCIIpan function
 ### helps in fethching, installation and configuration of netMHCIIpan
 
