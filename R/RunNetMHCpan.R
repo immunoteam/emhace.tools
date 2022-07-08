@@ -1,146 +1,92 @@
-### RunNetMHCpan function
-### starts one or multiple threads of RunNetMHCpan processes to start epitope predictions
-# outs <- mutate_at(outs, 1:2, as.character)
+# THE MAJOR STEPS
+# 1. Keeping valid peptides
+# 2. Keeping valid alleles
+# 3. Keeping valid output value types
+# 4. Keeping valid number of threads
+# 5. Doing paired analysis, if asked
+# 5.1 Forcing long format
+# 5.2 Checking for allele and peptide vector lengths
+# 5.3 Keeping only valid allele-peptide pairs
+# 5.4 Collecting peptides per alleles in a list format
+# 5.5 Running RunNetMHCpan function on the peptide subsets per alleles
+# 5.6 Assessing the outputs
 
-##################### TODOs
-# legyenek leellenőrizve az epitópok, hogy csak elfogadott karaktereket tartalmaznak-e
-# mit csinál a túl rövid szekikkel
-# ezeket mind adja ki egy logfájlba
-# mutate_at(2:5, as.numeric)
+# 6. Writing temporary pepfile to its location
+# 7. Generating commands to be run
+# 8. Modifying commands before running
+# 9. Running the predictions
+# 9.a Getting back results into R
+# 9.b Just running NetMHCpan 4.1 and leaving the result files
+# 10. Notifying the user about the successful run
 
-##################### SETTING INPUTS
-configs <- list()
-configs$software_dir <- "~/Programok/netMHCpan-4.1/"
-configs$software_loc <- "~/Programok/netMHCpan-4.1/netMHCpan"
-configs$tmppep_loc <- "~/Programok/netMHCpan-4.1/tmp.pep"
-configs$alleles_loc <- "~/Programok/netMHCpan-4.1/data/allelenames"
-# peptides <- c(sapply(1:20, function(x) {sample(c("A", "E", "K", "G", "D", "S", "C"), 9, replace = T) %>% paste0(collapse = "")}))
-# alleles <- sample(c(paste0("HLA-A02:0", 1:9)), size = 20, replace = T) # %>% unique()
-# alleles <- unique(alleles)
 
-# # TEMPORARILY SETTING ARGUMENTS TO NULL SO THE FUNCTION LOADS IT FROM THE CONFIG
-# peptides = NULL
-# pepfile_loc = NULL
-# paired_input = F
-# result_files_location = NULL
-# threads = 1
-# keep_pep = FALSE
-# software_loc = NULL
-# tmppep_loc = NULL
-# logfile_loc = "log.txt"
-# type = c("Score_EL", "Rank_EL", "Score_BA", "Rank_BA", "Aff_nm")
+software_path = "/home/lhgergo/Programok/netMHCpan-4.1/netMHCpan"
+tmppep_loc = "/home/lhgergo/Programok/netMHCpan-4.1/tmp.pep"
 
-##################### FUNCTIONS
 RunNetMHCpan <- function(alleles,
-                         peptides = NULL,
-                         pepfile_loc = NULL,
+                         peptides,
                          paired_input = F,
-                         type = c("Score_EL", "Rank_EL", "Score_BA", "Rank_BA", "Aff_nm"),
+                         value_type = c("Score_EL", "Rank_EL", "Score_BA", "Rank_BA", "Aff_nm"),
                          output_format = "long",
-                         result_files_location = NULL,
                          threads = 1,
+                         result_files_location = NULL,
                          keep_pep = FALSE,
-                         software_loc = NULL,
-                         tmppep_loc = NULL,
-                         logfile_loc = "log.txt") {
+                         software_path = NULL,
+                         tmppep_loc = NULL) {
   
-  # getting netMHCpan location from config file if not specified by the user
-  if(is.null(software_loc)) {software_loc <- configs$software_loc}
-  
-  # getting temporary pepfile location from config file if not specified by the user
-  if(is.null(tmppep_loc) & is.null(pepfile_loc)) {
-    tmppep_loc <- configs$tmppep_loc
-    tmppep_loc_for_paired <- configs$tmppep_loc
-  }
-  
-  # setting temporary pepfile location for paired analysis
-  tmppep_loc_for_paired <- configs$tmppep_loc
-  
-  # do not allow paired mode in case of pepfile input
-  if(!is.null(pepfile_loc) & paired_input) {
-    msg <- "Paired mode is not allowed when epitopes are loaded from pep file using argument pepfile_loc"
-    LogIt(msg, "RunNetMHCpan", logfile_loc, "stop")
-    stop(msg)
-  }
-  
-  # if pepfile_loc is defined, then use it as a source of input peptides instead of creating a temporary pepfile
-  if(!is.null(pepfile_loc)) {
-    tmppep_loc <- pepfile_loc
-    peptides <- readLines(pepfile_loc)
-    keep_pep <- TRUE
-    tmppep_loc_for_paired <- configs$tmppep_loc
-    
-    # checking if all peptides are OK in the pepfile, break if not
-    invalid_peptides <- peptides[!IsValidPeptide(peptides)]
-    if(length(invalid_peptides) > 0) {
-      msg <- paste0("input contains too short peptides and/or sequences containing invalid characters. \nPlease remove the following peptides before starting the prediction:\n",
-                    paste0(invalid_peptides[1:10], collapse = ", "), "and ", length(invalid_peptides)-10, " more.")
-      LogIt(msg, "RunNetMHCpan", logfile_loc, "stop")
-      stop(msg)
-    }
-  }
-  
-  # filtering for valid peptides (only if peptides are loaded directly from R, not from pepfile, and if it is not a paired analysis)
-  if(is.null(pepfile_loc) & !paired_input) {
+  # filtering for valid peptides (only if it is not a paired analysis)
+  if(!paired_input) {
     is_valid <- IsValidPeptide(peptides)
     invalid_peptides <- peptides[!is_valid]
     
     peptides <- peptides[is_valid]
     if(length(invalid_peptides) > 0) {
       msg <- paste("Skipped the following invalid peptides:", paste0(invalid_peptides, collapse = ", "))
-      LogIt(msg, funcname = "RunNetMHCpan", logfile_loc, "message")
       message(msg)
     }
   }
   
   # filtering for valid alleles (only if it is not a paired analysis)
-  software_loc_splt <- strsplit(software_loc, "\\/")[[1]]
-  alleles_supported <- readLines(paste0(c(software_loc_splt[-length(software_loc_splt)], "data", "allelenames"), collapse = "/")) %>% strsplit(" ") %>% unlist()
+  software_path_splt <- strsplit(software_path, "\\/")[[1]]
+  alleles_supported <- unlist(strsplit(readLines(paste0(c(software_path_splt[-length(software_path_splt)], "data", "allelenames"), collapse = "/")), " "))
   if(!paired_input) {
     is_valid_allele <- alleles %in% alleles_supported
     invalid_alleles <- alleles[!is_valid_allele]
-    alleles <- alleles[is_valid_allele]
+    alleles <- unique(alleles[is_valid_allele])
     if(length(invalid_alleles) > 0) {
       msg <- "Skipped the following unsupported alleles:"
-      LogIt(paste(msg, paste0(invalid_alleles, collapse = ", ")), funcname = "RunNetMHCpan", logfile_loc, "message")
       message(paste(msg, paste0(invalid_alleles, collapse = ", ")))
     }
   }
-
-  # if any of the types is not supported, return a warning message
-  bvaltypes_unsupported <- setdiff(type, c("Score_EL", "Rank_EL", "Score_BA", "Rank_BA", "Aff_nm"))
-  if(!is.null(type) & all(type %in% bvaltypes_unsupported)) {
+  
+  # filtering for supported output value types
+  bvaltypes_unsupported <- setdiff(value_type, c("Score_EL", "Rank_EL", "Score_BA", "Rank_BA", "Aff_nm"))
+  if(!is.null(value_type) & all(value_type %in% bvaltypes_unsupported)) {
     msg <- "None of the binding value types are supported by netMHCpan 4.1."
-    LogIt(msg, "RunNetMHCpan", logfile_loc, "stop")
     stop(msg)
   } else if (length(bvaltypes_unsupported) > 0) {
-    msg <- paste0("The following binding value types are not supported by netMHCpan 4.1, so they have been skipped: ",
+    msg <- paste0("The following binding value types are not supported by netMHCpan 4.1, they will be skipped: ",
                   paste0(bvaltypes_unsupported, collapse = ", "))
-    LogIt(msg, "RunNetMHCpan", logfile_loc, "warning")
     warning(msg)
   }
   
   # if number of threads is higher than CPUs available, reset number of threads
-  n_cores <- detectCores()
+  n_cores <- parallel::detectCores()
   if(threads > n_cores | threads < 1) {
-    msg <- paste0("Resetting number of threads to be used (", threads,") to the number of available CPUs (", n_cores, ")")
-    LogIt(msg, "RunNetMHCpan", logfile_loc, "message")
+    msg <- paste0("Resetting number of threads to be used (", threads,") to the number of available threads (", n_cores, ")")
     message(msg)
     threads <- n_cores
   }
   
-  # if paired_input is TRUE treat alleles and peptides as pairs
-  # forces the usage of "long" output format
+  # performing analyses for paired input
   if(paired_input) {
     if(output_format == "wide") {
       msg <- "'wide' output format is not supported in paired mode, using 'long' output."
-      LogIt(msg, "RunNetMHCpan", logfile_loc, "warning")
       warning(msg)
       output_format <- "long"
     }
     if(length(alleles) != length(peptides)) {
       msg <- "Pairwise prediction cannot be performed because length of allele vector is not equal to the length of peptide vector"
-      LogIt(msg, "RunNetMHCpan", logfile_loc, "stop")
       stop(msg)
     }
     
@@ -149,7 +95,6 @@ RunNetMHCpan <- function(alleles,
     alleles <- alleles[is_valid_allele]
     if(length(invalid_alleles) > 0) {
       msg <- paste("Skipped the following unsupported alleles:", paste0(invalid_alleles, collapse = ", "))
-      LogIt(msg, funcname = "RunNetMHCpan", logfile_loc, "message")
       message(msg)
     }
     
@@ -164,47 +109,46 @@ RunNetMHCpan <- function(alleles,
     peptides <- peptides[is_valid_pair]
     if(any(!is_valid_pair)) {
       msg <- paste("Skipped the following invalid peptide-allele pairs:", paste0(invalid_peptides, "-", invalid_alleles, collapse = ", "))
-      LogIt(msg, "RunNetMHCpan", logfile_loc, "message")
       message(msg)
     }
     
     # collecting peptides per alleles
-    peptides_per_alleles <- aggregate(peptides ~ alleles, FUN =  function(x) {x})
-    peptides_per_alleles <- set_names(peptides_per_alleles$peptides, peptides_per_alleles$alleles)
+    peptides_per_alleles <- aggregate(peptides ~ alleles, FUN =  function(x) {x}, simplify = FALSE)
+    peptides_per_alleles <- magrittr::set_names(peptides_per_alleles$peptides, peptides_per_alleles$alleles)
     
     if(threads == 1) {
-      suppressWarnings(outlist <- imap(peptides_per_alleles, ~RunNetMHCpan(alleles = .y, peptides = .x,
-                                                          type = type, output_format = output_format,
-                                                          result_files_location = result_files_location,
-                                                          threads = 1, keep_pep = keep_pep, software_loc = software_loc,
-                                                          tmppep_loc = tmppep_loc_for_paired)))
+      suppressWarnings(outlist <- purrr::imap(peptides_per_alleles, ~RunNetMHCpan(alleles = .y, peptides = .x,
+                                                                                  value_type = type, output_format = output_format,
+                                                                                  result_files_location = result_files_location,
+                                                                                  threads = 1, keep_pep = keep_pep, software_path = software_path,
+                                                                                  tmppep_loc = tmppep_loc)))
     } else {
-      plan(multisession, workers = threads)
-      suppressWarnings(outlist <- future_imap(peptides_per_alleles, ~RunNetMHCpan(alleles = .y, peptides = .x,
-                                                          type = type, output_format = output_format,
-                                                          result_files_location = result_files_location,
-                                                          threads = 1, keep_pep = keep_pep, software_loc = software_loc,
-                                                          tmppep_loc = paste0(tmppep_loc_for_paired, ".", gsub("\\:", "-", .y)))))
+      future::plan(multisession, workers = threads)
+      suppressWarnings(outlist <- furrr::future_imap(peptides_per_alleles, ~RunNetMHCpan(alleles = .y, peptides = .x,
+                                                                                         value_type = value_type, output_format = output_format,
+                                                                                         result_files_location = result_files_location,
+                                                                                         threads = 1, keep_pep = keep_pep, software_path = software_path,
+                                                                                         tmppep_loc = paste0(tmppep_loc, ".", gsub("\\:", "-", .y)))))
+      future:::ClusterRegistry("stop")
     }
-    
-    
+    print("ideisjövökmég")
     return(set_rownames(do.call(rbind.data.frame, outlist), NULL))
   }
   
   # writing temporary pepfile to its location
-  if(is.null(pepfile_loc)) {write(peptides, file = tmppep_loc)}
+  if(!paired_input) {write(peptides, file = tmppep_loc)}
   
   # generating commands to run
   cmds <- sapply(alleles, function(allele) {
-    paste0(software_loc, " -inptype 1 -f ", tmppep_loc  ," -BA -a ", allele, sep = "")
+    paste0(software_path, " -inptype 1 -f ", tmppep_loc  ," -BA -a ", allele, sep = "")
   }, USE.NAMES = F)
   
   # if a result file directory is specified
   if(!is.null(result_files_location)) {
     suppressWarnings(dir.create(result_files_location, recursive = TRUE))  # creating result files directory
-    alleles_underscore <- gsub("\\:", "_", alleles) # windows cannot handle colons in filenames...
+    alleles_underscore <- gsub("\\:", "_", alleles) # windows cannot handle colons in filenames
     alleles_underscore <- gsub("\\-", "_", alleles_underscore)
-    if(is.null(type)) {
+    if(is.null(value_type)) {
       cmds <- paste0(cmds, " > ", result_files_location, "/", alleles_underscore, ".txt")
     } else {
       cmds <- paste0(cmds, " | tee ", result_files_location, "/", alleles_underscore, ".txt")
@@ -212,13 +156,13 @@ RunNetMHCpan <- function(alleles,
   }
   
   # RUNNING PREDICTIONS - and optionally collecting binding values
-  if(!is.null(type)) {
+  if(!is.null(value_type)) {
     results <- RunCommand(cmds, threads = threads, intern = T)
     if(!keep_pep) {file.remove(tmppep_loc)} # removing temporary pepfile
-    outobj <- InstantRecognMatrix(results, type = type, output_format = output_format)
+    outobj <- CollectBindingResults(results, value_type = value_type, output_format = output_format)
     
     # stroring version number
-    predictor.version <- results[[1]][grepl("# NetMHCpan version", results[[1]])] %>% strsplit(" ") %>% unlist()
+    predictor.version <- unlist(strsplit(results[[1]][grepl("# NetMHCpan version", results[[1]])], " "))
     attr(outobj, "predictor_version") <- predictor.version[length(predictor.version)]
     attr(outobj, "HLA_type") <- "I"
     
@@ -229,23 +173,16 @@ RunNetMHCpan <- function(alleles,
   }
   
   # printing final message
-  if(is.null(type)) {
+  if(is.null(value_type)) {
     msg <- paste0("Predictions are done, see result files in ", result_files_location)
-    LogIt(msg, "RunNetMHCpan", logfile_loc, "message")
     message(msg)
   }
 }
 
-##################### TESTING
-# peptides <- c(sapply(1:2000, function(x) {sample(c("A", "E", "K", "G", "D", "S", "C"), 9, replace = T) %>% paste0(collapse = "")}))
-# alleles <- c("HLA-A02:01", "HLA-B07:02")
-# RunNetMHCpan(alleles, peptides, output_format = "long", paired_input = F) -> resultsdf
- 
-# CreateDB("db_playground/new.db")
-# AppendResultsToDB(resultsdf, dbloc = "db_playground/eps.db")
-# 
-# con <- dbConnect(RSQLite::SQLite(), "db_playground/eps.db")
-# dbReadTable(con, "bvals")
-# melt(resultsdf)
-
-
+alleles <- c("HLA-A02:01","HLA-A02:01", "HLA-A02:01", "HLA-A02:01", "HLA-A02:01", "HLA-B07:02", "HLA-B07:02", "HLA-B07:02", "HLA-B07:02")
+peptides <- sapply(1:9, \(x) {sample(rownames(protr::AABLOSUM100), 9, replace = TRUE) %>% paste0(collapse = "")})
+out <- RunNetMHCpan(alleles = alleles, peptides = peptides, paired_input = FALSE, output_format = "wide",
+             software_path = "/home/lhgergo/Programok/netMHCpan-4.1/netMHCpan",
+             tmppep_loc = "/home/lhgergo/Programok/netMHCpan-4.1/tmppep.pep",
+             result_files_location = "~/Programok/out/")
+LoadResultsFromDir("~/Programok/out") %>% CollectBindingResults(output_format = "wide")
