@@ -40,10 +40,7 @@
 #"http://www.cbs.dtu.dk/services/NetMHCIIpan/alleles_name.list"
 #"http://www.cbs.dtu.dk/services/NetMHCpan/MHC_allele_names.txt"
 
-SimplifyAlleles = function(allele, output.format = "netmhc") {
-  
-  packs <- c("fastmatch","stringr")
-  invisible(lapply(packs, require, character.only = TRUE))
+SimplifyAlleles = function(allele, output.format = "netmhc", ) {
   netmhc_allowed_alleles = readLines("/home/workstation/netMHCpan-tools/netmhcpan_allowed_alleles.txt")
   mysplit = function(s) {unlist(strsplit(s,":"),use.names = F)}
   
@@ -62,7 +59,7 @@ SimplifyAlleles = function(allele, output.format = "netmhc") {
     } else if(hlaclass == "i") {
       #HLA-I
       tempallele = gsub("/|-","",tempallele)
-      if(str_count(string = tempallele, pattern = "[ABC]") != 1 | length(intersect(unlist(strsplit(tempallele,""),use.names = F), setdiff(LETTERS,c("A","B","C")))) > 0) {
+      if(stringr::str_count(string = tempallele, pattern = "[ABC]") != 1 | length(intersect(unlist(strsplit(tempallele,""),use.names = F), setdiff(LETTERS,c("A","B","C")))) > 0) {
         tempallele = "invalid or incomplete allele"
       } else if(output.format == "simple") {
         if(grepl(":", tempallele)) tempallele = paste0(mysplit(tempallele),collapse = "")
@@ -82,7 +79,7 @@ SimplifyAlleles = function(allele, output.format = "netmhc") {
         } else {
           tempallele = paste0("HLA-", substr(tempallele,1,3), ":", substr(tempallele,4,5))
         }
-        if(is.na(fmatch(tempallele,netmhc_allowed_alleles))) tempallele = "NetMHCpan is unable to predict binding to this allele."
+        if(is.na(fastmatch::fmatch(tempallele,netmhc_allowed_alleles))) tempallele = "NetMHCpan is unable to predict binding to this allele."
       }
 
     } else {
@@ -115,7 +112,7 @@ SimplifyAlleles = function(allele, output.format = "netmhc") {
             tempallele = paste0("DRB1_",substr(tempallele,5,9))
           }
         }
-        if(str_count(tempallele, "D") != 1 | str_count(string = tempallele, pattern = "R") != 1 | str_count(string = tempallele, pattern = "B") != 1 | length(intersect(unlist(strsplit(tempallele,""),use.names = F), setdiff(LETTERS,c("A","B","D","P","Q","R")))) > 0 | str_count(tempallele, "[A-Z]")>3) {
+        if(stringr::str_count(tempallele, "D") != 1 | stringr::str_count(string = tempallele, pattern = "R") != 1 | stringr::str_count(string = tempallele, pattern = "B") != 1 | length(intersect(unlist(strsplit(tempallele,""),use.names = F), setdiff(LETTERS,c("A","B","D","P","Q","R")))) > 0 | stringr::str_count(tempallele, "[A-Z]")>3) {
           tempallele = "invalid or incomplete allele"
         }
       } else if((grepl("DPA", tempallele) & grepl("DPB", tempallele)) | (grepl("DQA", tempallele) & grepl("DQB", tempallele))) {
@@ -144,7 +141,7 @@ SimplifyAlleles = function(allele, output.format = "netmhc") {
         if(grepl(":", tempallele1)) tempallele1 = paste0(mysplit(tempallele1),collapse = "")
         if(grepl(":", tempallele2)) tempallele2 = paste0(mysplit(tempallele2),collapse = "")
         tempallele = paste("HLA", tempallele1, tempallele2, sep = "-")
-        if(is.na(fmatch(tempallele1_netmhc,netmhc_allowed_alleles)) | is.na(fmatch(tempallele2_netmhc,netmhc_allowed_alleles))) tempallele = "NetMHCpan is unable to predict binding to this allele OR invalid allele."
+        if(is.na(fastmatch::fmatch(tempallele1_netmhc,netmhc_allowed_alleles)) | is.na(fastmatch::fmatch(tempallele2_netmhc,netmhc_allowed_alleles))) tempallele = "NetMHCpan is unable to predict binding to this allele OR invalid allele."
       } else {
         tempallele = "invalid or incomplete allele"
       }
