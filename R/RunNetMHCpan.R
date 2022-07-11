@@ -1,3 +1,4 @@
+#' @export
 # THE MAJOR STEPS
 # 1. Keeping valid peptides
 # 2. Keeping valid alleles
@@ -18,10 +19,6 @@
 # 9.a Getting back results into R
 # 9.b Just running NetMHCpan 4.1 and leaving the result files
 # 10. Notifying the user about the successful run
-
-
-software_path = "/home/lhgergo/Programok/netMHCpan-4.1/netMHCpan"
-tmppep_loc = "/home/lhgergo/Programok/netMHCpan-4.1/tmp.pep"
 
 RunNetMHCpan <- function(alleles,
                          peptides,
@@ -178,11 +175,3 @@ RunNetMHCpan <- function(alleles,
     message(msg)
   }
 }
-
-alleles <- c("HLA-A02:01","HLA-A02:01", "HLA-A02:01", "HLA-A02:01", "HLA-A02:01", "HLA-B07:02", "HLA-B07:02", "HLA-B07:02", "HLA-B07:02")
-peptides <- sapply(1:9, \(x) {sample(rownames(protr::AABLOSUM100), 9, replace = TRUE) %>% paste0(collapse = "")})
-out <- RunNetMHCpan(alleles = alleles, peptides = peptides, paired_input = FALSE, output_format = "wide",
-             software_path = "/home/lhgergo/Programok/netMHCpan-4.1/netMHCpan",
-             tmppep_loc = "/home/lhgergo/Programok/netMHCpan-4.1/tmppep.pep",
-             result_files_location = "~/Programok/out/")
-LoadResultsFromDir("~/Programok/out") %>% CollectBindingResults(output_format = "wide")

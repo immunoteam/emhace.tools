@@ -1,3 +1,4 @@
+#' @export
 CollectBindingResults <- function(results, value_type = c("Score_EL", "Rank_EL", "Score_BA", "Rank_BA", "Aff_nm"), output_format = "long", hla_type = 1){
   if(hla_type == 1) {
     datarow_identifier <- "PEPLIST "
