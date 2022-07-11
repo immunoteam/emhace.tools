@@ -1,12 +1,21 @@
 Package: emhace.tools
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Title: A package for user-friendly management of MHC binding prediction runs and results.
+Version: 0.1
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+    person("Gergő Mihály", "Balogh", , "gmbalogh@brc.hu", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-7583-4980"))
 Description: What the package does (one paragraph).
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.0
+Imports:
+    parallel
+    furrr
+    future
+    magrittr
+    purrr
+    fastmatch
+    stringr
+    data.table
