@@ -58,7 +58,7 @@ CreateRecognMatrixII = function(dir, type = c("Score_EL", "Rank_EL"), output_for
 
 
 #test
-  #letesztelni gsub v invisible() paranccsal /supress.warning() gyorsabb-e
+#letesztelni gsub v invisible() paranccsal /supress.warning() gyorsabb-e
 
 #runFunction ouput:
 #load("RunNetMHCpan_playground/results_list.RData")
@@ -89,4 +89,3 @@ InstantRecognMatrixII = function(results, type = c("Score_EL", "Rank_EL"), outpu
   return(mtx)
 }
 
-  
