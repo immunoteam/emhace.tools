@@ -1,5 +1,4 @@
 #' @export
-
 ### IsValidPeptide
 ### checks if the given peptide has a correct length and all the characters in it are valid ones
 amino_acids <- rownames(protr::AABLOSUM45)
