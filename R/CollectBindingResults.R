@@ -4,12 +4,12 @@ CollectBindingResults <- function(results, value_type = c("Score_EL", "Rank_EL",
     datarow_identifier <- "PEPLIST "
     to_be_trimmed_wb <- " <= WB"
     to_be_trimmed_sb <- " <= SB"
-    coords <- c(3, 4, 13, 14, 15, 16, 17)
+    coords <- c(2, 3, 12, 13, 14, 16, 17)
   } else if (hla_type == 2) {
     datarow_identifier <- "Sequence "
     to_be_trimmed_wb <- " <=WB"
     to_be_trimmed_sb <- " <=WB"
-    coords <- c(3, 4, 9, 10, 12, 14, 13)
+    coords <- c(2, 3, 8, 9, 11, 13, 12)
   } else {
     stop("The value of hla_type can be either 1 or 2!")
   }
@@ -18,6 +18,7 @@ CollectBindingResults <- function(results, value_type = c("Score_EL", "Rank_EL",
   
   # create long format
   resultsdf <- as.data.frame(do.call(rbind, lapply(results, function(x){
+    x <- stringr::str_trim(x, "left")
     x <- x[grep(datarow_identifier, x)]
     x <- gsub(to_be_trimmed_wb, "", x)
     x <- gsub(to_be_trimmed_sb, "", x)
