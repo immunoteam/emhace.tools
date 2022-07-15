@@ -117,14 +117,14 @@ RunNetMHCIIpan <- function(alleles,
     peptides_per_alleles <- magrittr::set_names(peptides_per_alleles$peptides, peptides_per_alleles$alleles)
     
     if(threads == 1) {
-      suppressWarnings(outlist <- purrr::imap(peptides_per_alleles, ~RunNetMHCpan(alleles = .y, peptides = .x,
+      suppressWarnings(outlist <- purrr::imap(peptides_per_alleles, ~RunNetMHCIIpan(alleles = .y, peptides = .x,
                                                                                   value_type = type, output_format = output_format,
                                                                                   result_files_location = result_files_location,
                                                                                   threads = 1, keep_pep = keep_pep, software_path = software_path,
                                                                                   tmppep_loc = tmppep_loc)))
     } else {
       future::plan(multisession, workers = threads)
-      suppressWarnings(outlist <- furrr::future_imap(peptides_per_alleles, ~RunNetMHCpan(alleles = .y, peptides = .x,
+      suppressWarnings(outlist <- furrr::future_imap(peptides_per_alleles, ~RunNetMHCIIpan(alleles = .y, peptides = .x,
                                                                                          value_type = value_type, output_format = output_format,
                                                                                          result_files_location = result_files_location,
                                                                                          threads = 1, keep_pep = keep_pep, software_path = software_path,
