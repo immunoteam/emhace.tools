@@ -1,6 +1,6 @@
 #' @export
 GenerateXmers <- function(x, l, string_input = TRUE) {
-  if(string_input) out <- unlist(strsplit(out, ""), use.names = FALSE)
+  if(string_input) x <- unlist(strsplit(x, ""), use.names = FALSE)
   coordsmtx <- cbind(seq(1, length(x)), seq(1, length(x)) + l - 1)
   coordsmtx <- coordsmtx[coordsmtx[, 1] <= length(x), , drop = FALSE]
   coordsmtx <- coordsmtx[coordsmtx[, 2] <= length(x), , drop = FALSE]
