@@ -31,8 +31,9 @@ RunNetMHCpan <- function(alleles,
                          software_path = NULL,
                          tmppep_loc = NULL) {
   
-  # setting temporary pepfile defult location
-  if(is.null(tmppep_loc)) {paste0(software_path, "/tmp.pep")}
+  # setting tmppep_loc
+  software_path_splt <- strsplit(software_path, "\\/")[[1]]
+  if(is.null(tmppep_loc)) {tmppep_loc <- paste0(paste0(software_path_splt[-length(software_path_splt)], collapse = "/"), "/tmp.pep")}
   
   # filtering for valid peptides (only if it is not a paired analysis)
   if(!paired_input) {
@@ -47,8 +48,6 @@ RunNetMHCpan <- function(alleles,
   }
   
   # filtering for valid alleles (only if it is not a paired analysis)
-  software_path_splt <- strsplit(software_path, "\\/")[[1]]
-  
   alleles_supported <- unlist(strsplit(readLines(paste0(c(software_path_splt[-length(software_path_splt)], "data", "allelenames"), collapse = "/")), " "))
   if(!paired_input) {
     is_valid_allele <- alleles %in% alleles_supported
