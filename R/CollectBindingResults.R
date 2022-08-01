@@ -4,7 +4,7 @@ CollectBindingResults <- function(results, value_type = c("Score_EL", "Rank_EL",
     datarow_identifier <- "PEPLIST "
     to_be_trimmed_wb <- " <= WB"
     to_be_trimmed_sb <- " <= SB"
-    coords <- c(2, 3, 12, 13, 14, 16, 17)
+    coords <- c(2, 3, 12, 13, 14, 15, 16)
   } else if (hla_type == 2) {
     datarow_identifier <- "Sequence "
     to_be_trimmed_wb <- " <=WB"
