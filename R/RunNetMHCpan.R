@@ -118,7 +118,7 @@ RunNetMHCpan <- function(alleles,
     
     if(threads == 1) {
       suppressWarnings(outlist <- purrr::imap(peptides_per_alleles, ~RunNetMHCpan(alleles = .y, peptides = .x,
-                                                                                  value_type = type, output_format = output_format,
+                                                                                  value_type = value_type, output_format = output_format,
                                                                                   result_files_location = result_files_location,
                                                                                   threads = 1, keep_pep = keep_pep, software_path = software_path,
                                                                                   tmppep_loc = tmppep_loc)))
