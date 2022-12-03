@@ -123,7 +123,7 @@ RunNetMHCpan <- function(alleles,
                                                                                          tmppep_loc = paste0(tmppep_loc, ".", gsub("\\:", "-", .y)))))
       future:::ClusterRegistry("stop")
     }
-    print("ideisjövökmég") # valószínűleg javítva!
+    
     return(set_rownames(do.call(rbind.data.frame, outlist), NULL))
   }
   
