@@ -90,14 +90,6 @@ RunNetMHCpan <- function(alleles,
       stop(msg)
     }
     
-    is_valid_allele <- alleles %in% alleles_supported
-    invalid_alleles <- alleles[!is_valid_allele]
-    alleles <- alleles[is_valid_allele]
-    if(length(invalid_alleles) > 0) {
-      msg <- paste("Skipped the following unsupported alleles:", paste0(invalid_alleles, collapse = ", "))
-      message(msg)
-    }
-    
     # checking if all peptides are valid, keeping only valid pairs
     is_valid_peptide <- IsValidPeptide(peptides)
     is_valid_allele <- alleles %in% alleles_supported
@@ -131,7 +123,7 @@ RunNetMHCpan <- function(alleles,
                                                                                          tmppep_loc = paste0(tmppep_loc, ".", gsub("\\:", "-", .y)))))
       future:::ClusterRegistry("stop")
     }
-    print("ideisjövökmég")
+    print("ideisjövökmég") # valószínűleg javítva!
     return(set_rownames(do.call(rbind.data.frame, outlist), NULL))
   }
   
