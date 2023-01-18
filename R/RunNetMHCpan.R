@@ -31,6 +31,10 @@ RunNetMHCpan <- function(alleles,
                          software_path = NULL,
                          tmppep_loc = NULL) {
   
+  # removing asterisks from allele names
+  # asterisk-containing allele names are being misinterpreted by bash
+  alleles <- gsub("\\*", "", alleles)
+  
   # setting tmppep_loc
   software_path_splt <- strsplit(software_path, "\\/")[[1]]
   if(is.null(tmppep_loc)) {tmppep_loc <- paste0(paste0(software_path_splt[-length(software_path_splt)], collapse = "/"), "/tmp.pep")}
