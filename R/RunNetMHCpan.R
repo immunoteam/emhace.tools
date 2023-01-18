@@ -90,6 +90,11 @@ RunNetMHCpan <- function(alleles,
       stop(msg)
     }
     
+    # storing the original input data before filtering for valid pairs
+    # this is needed to return the corresponding binding values based on the original input of the function
+    alleles_input <- alleles
+    peptides_input <- peptides
+    
     # checking if all peptides are valid, keeping only valid pairs
     is_valid_peptide <- IsValidPeptide(peptides)
     is_valid_allele <- alleles %in% alleles_supported
@@ -124,7 +129,11 @@ RunNetMHCpan <- function(alleles,
       future:::ClusterRegistry("stop")
     }
     
-    return(set_rownames(do.call(rbind.data.frame, outlist), NULL))
+    # assembling output
+    outdf <- magrittr::set_rownames(do.call(rbind.data.frame, outlist), NULL)
+    outdf <- outdf[fastmatch::fmatch(paste0(gsub("\\*", "", alleles_input), ".", peptides_input),
+                                     paste0(gsub("\\*", "", outdf$allele), ".", outdf$peptide)), ]
+    return(outdf)
   }
   
   # writing temporary pepfile to its location
