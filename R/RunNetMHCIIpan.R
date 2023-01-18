@@ -90,6 +90,12 @@ RunNetMHCIIpan <- function(alleles,
       stop(msg)
     }
     
+    # storing the original input data before filtering for valid pairs
+    # this is needed to return the corresponding binding values based on the original input of the function
+    alleles_input <- alleles
+    peptides_input <- peptides
+    
+    # the following snippet till the "checking if..." should be checked. what is the function of this?
     is_valid_allele <- alleles %in% alleles_supported
     invalid_alleles <- alleles[!is_valid_allele]
     alleles <- alleles[is_valid_allele]
@@ -99,7 +105,7 @@ RunNetMHCIIpan <- function(alleles,
     }
     
     # checking if all peptides are valid, keeping only valid pairs
-    is_valid_peptide <- IsValidPeptide(peptides)
+    is_valid_peptide <- IsValidPeptide(peptides, hla_type = 2)
     is_valid_allele <- alleles %in% alleles_supported
     is_valid_pair <- is_valid_peptide & is_valid_allele
     
@@ -118,10 +124,10 @@ RunNetMHCIIpan <- function(alleles,
     
     if(threads == 1) {
       suppressWarnings(outlist <- purrr::imap(peptides_per_alleles, ~RunNetMHCIIpan(alleles = .y, peptides = .x,
-                                                                                  value_type = type, output_format = output_format,
-                                                                                  result_files_location = result_files_location,
-                                                                                  threads = 1, keep_pep = keep_pep, software_path = software_path,
-                                                                                  tmppep_loc = tmppep_loc)))
+                                                                                    value_type = value_type, output_format = output_format,
+                                                                                    result_files_location = result_files_location,
+                                                                                    threads = 1, keep_pep = keep_pep, software_path = software_path,
+                                                                                    tmppep_loc = tmppep_loc)))
     } else {
       future::plan(multisession, workers = threads)
       suppressWarnings(outlist <- furrr::future_imap(peptides_per_alleles, ~RunNetMHCIIpan(alleles = .y, peptides = .x,
@@ -131,8 +137,12 @@ RunNetMHCIIpan <- function(alleles,
                                                                                          tmppep_loc = paste0(tmppep_loc, ".", gsub("\\:", "-", .y)))))
       future:::ClusterRegistry("stop")
     }
-    print("ideisjövökmég")
-    return(set_rownames(do.call(rbind.data.frame, outlist), NULL))
+    
+    # assembling output
+    outdf <- magrittr::set_rownames(do.call(rbind.data.frame, outlist), NULL)
+    outdf <- outdf[fastmatch::fmatch(paste0(gsub("\\*", "", alleles_input), ".", peptides_input),
+                                     paste0(gsub("\\*", "", outdf$allele), ".", outdf$peptide)), ]
+    return(outdf)
   }
   
   # writing temporary pepfile to its location
