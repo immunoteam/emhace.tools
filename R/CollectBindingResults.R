@@ -4,12 +4,12 @@ CollectBindingResults <- function(results, value_type = c("Score_EL", "Rank_EL",
     datarow_identifier <- "PEPLIST "
     to_be_trimmed_wb <- " <= WB"
     to_be_trimmed_sb <- " <= SB"
-    coords <- c(2, 3, 12, 13, 14, 15, 16)
+    coords <- c(2, 3, 4, 12, 13, 14, 15, 16)
   } else if (hla_type == 2) {
     datarow_identifier <- "Sequence "
     to_be_trimmed_wb <- " <=WB"
     to_be_trimmed_sb <- " <=SB"
-    coords <- c(2, 3, 8, 9, 11, 13, 12)
+    coords <- c(2, 3, 5, 8, 9, 11, 13, 12)
   } else {
     stop("The value of hla_type can be either 1 or 2!")
   }
@@ -25,10 +25,10 @@ CollectBindingResults <- function(results, value_type = c("Score_EL", "Rank_EL",
     mat <- do.call(rbind, strsplit(x, "\\s+"))
     mat[, coords]
   })), stringsAsFactors = F)
-  for (i in 3:7) {resultsdf[, i] <- as.numeric(resultsdf[, i])}
+  for (i in 4:8) {resultsdf[, i] <- as.numeric(resultsdf[, i])}
   
-  colnames(resultsdf) <- c("allele", "peptide", "Score_EL", "Rank_EL", "Score_BA", "Rank_BA", "Aff_nm")
-  resultsdf <- cbind.data.frame(resultsdf[, 1:2], resultsdf[, colnames(resultsdf) %in% value_type, drop = FALSE])
+  colnames(resultsdf) <- c("allele", "peptide", "core", "Score_EL", "Rank_EL", "Score_BA", "Rank_BA", "Aff_nm")
+  resultsdf <- cbind.data.frame(resultsdf[, 1:3], resultsdf[, colnames(resultsdf) %in% value_type, drop = FALSE])
   
   # create wide format
   if(output_format == "wide"){
