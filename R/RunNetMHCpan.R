@@ -26,10 +26,15 @@ RunNetMHCpan <- function(alleles,
                          value_type = c("Score_EL", "Rank_EL", "Score_BA", "Rank_BA", "Aff_nm"),
                          output_format = "long",
                          threads = 1,
+                         version_number = "4.1",
                          result_files_location = NULL,
                          keep_pep = FALSE,
                          software_path = NULL,
                          tmppep_loc = NULL) {
+  
+  if (!version_number %in% c("4.0", "4.1")) {
+    stop("the version number of NetMHCpan is either not inputed as a string or is not supported. Make sure to use either NetMHCpan 4.0 or 4.1.")
+  }
   
   # removing asterisks from allele names
   # asterisk-containing allele names are being misinterpreted by bash
@@ -64,13 +69,19 @@ RunNetMHCpan <- function(alleles,
   }
   
   # filtering for supported output value types
-  bvaltypes_unsupported <- setdiff(value_type, c("Score_EL", "Rank_EL", "Score_BA", "Rank_BA", "Aff_nm"))
+  if(version_number == "4.1") {
+    bvaltypes_unsupported <- setdiff(value_type, c("Score_EL", "Rank_EL", "Score_BA", "Rank_BA", "Aff_nm"))
+  } else if (version_number == "4.0") {
+    bvaltypes_unsupported <- setdiff(value_type, c("Score_BA", "Rank_BA", "Aff_nm", "Exp"))
+  }
+  
   if(!is.null(value_type) & all(value_type %in% bvaltypes_unsupported)) {
-    msg <- "None of the binding value types are supported by netMHCpan 4.1."
+    msg <- "None of the binding value types are supported by the selected version of netMHCpan."
     stop(msg)
   } else if (length(bvaltypes_unsupported) > 0) {
-    msg <- paste0("The following binding value types are not supported by netMHCpan 4.1, they will be skipped: ",
+    msg <- paste0("The following binding value types are not supported by the selected version of netMHCpan, they will be skipped: ",
                   paste0(bvaltypes_unsupported, collapse = ", "))
+    value_type <- setdiff(value_type, bvaltypes_unsupported)
     warning(msg)
   }
   
@@ -120,6 +131,7 @@ RunNetMHCpan <- function(alleles,
     if(threads == 1) {
       suppressWarnings(outlist <- purrr::imap(peptides_per_alleles, ~RunNetMHCpan(alleles = .y, peptides = .x,
                                                                                   value_type = value_type, output_format = output_format,
+                                                                                  version_number = version_number,
                                                                                   result_files_location = result_files_location,
                                                                                   threads = 1, keep_pep = keep_pep, software_path = software_path,
                                                                                   tmppep_loc = tmppep_loc)))
@@ -127,6 +139,7 @@ RunNetMHCpan <- function(alleles,
       future::plan(multisession, workers = threads)
       suppressWarnings(outlist <- furrr::future_imap(peptides_per_alleles, ~RunNetMHCpan(alleles = .y, peptides = .x,
                                                                                          value_type = value_type, output_format = output_format,
+                                                                                         version_number = version_number,
                                                                                          result_files_location = result_files_location,
                                                                                          threads = 1, keep_pep = keep_pep, software_path = software_path,
                                                                                          tmppep_loc = paste0(tmppep_loc, ".", gsub("\\:", "-", .y)))))
@@ -164,7 +177,7 @@ RunNetMHCpan <- function(alleles,
   if(!is.null(value_type)) {
     results <- RunCommand(cmds, threads = threads, intern = T)
     if(!keep_pep) {file.remove(tmppep_loc)} # removing temporary pepfile
-    outobj <- CollectBindingResults(results, value_type = value_type, output_format = output_format)
+    outobj <- CollectBindingResults(results, value_type = value_type, output_format = output_format, version_number = version_number)
     
     # stroring version number
     predictor.version <- unlist(strsplit(results[[1]][grepl("# NetMHCpan version", results[[1]])], " "))
