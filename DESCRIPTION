@@ -4,7 +4,7 @@ Version: 0.1
 Authors@R: 
     person("Gergő Mihály", "Balogh", , "gmbalogh@brc.hu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-7583-4980"))
-Description: What the package does (one paragraph).
+Description: The package contains functions to get and run MHC binding prediction softwares, as well as processing their outputs. At the moment this library focused on NetMHCpan/NetMHCIIpan.
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 Encoding: UTF-8
@@ -19,3 +19,4 @@ Imports:
     fastmatch,
     stringr,
     data.table
+    protr
