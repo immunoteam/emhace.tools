@@ -18,5 +18,5 @@ Imports:
     purrr,
     fastmatch,
     stringr,
-    data.table
+    data.table,
     protr
