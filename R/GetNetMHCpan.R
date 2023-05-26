@@ -3,7 +3,7 @@
 ### GetNetMHCpan function
 ### helps in fethching, installation and configuration of netMHCpan
 
-GetNetMHCpan <- function() {
+GetNetMHCpan <- function(version_number = "4.1") {
   # checking if the user performed the function call from Linux
   if(Sys.info()['sysname'] != "Linux") {
     stop("Installation is only available on Linux systems!")
@@ -21,7 +21,7 @@ GetNetMHCpan <- function() {
   suppressWarnings(dir.create(download_path, recursive = T))
   
   # opening browser to fill in the form
-  message("On the webpage appearing soon please choose netMHCpan 4.1 for download, and fill in the form!")
+  message(paste0("On the webpage appearing soon please choose netMHCpan ", version_number, " for download, and fill in the form!"))
   message("Please use your institutional e-mail adress for registration! You will get a link to an FTP repository in an e-mail.")
   message("When you receive your e-mail, paste the link from the mail in this console below!")
   readline("Press <ENTER> to open the download website")
@@ -29,7 +29,10 @@ GetNetMHCpan <- function() {
   
   # downloading main archive
   ftplink <- readline("Link from the _e-mail_: ")
-  download.file(paste0(ftplink, "/netMHCpan-4.1b.Linux.tar.gz"), destfile = paste0(download_path, "/netmhcpan.tar.gz"))
+  download_page <- rvest::read_html(ftplink)
+  pkg_file <- download_page %>% html_elements("a") %>% html_attr("href") %>% extract(grepl("\\.tar.gz", .))
+  
+  download.file(paste0(ftplink, "/", pkg_file), destfile = paste0(download_path, "/netmhcpan.tar.gz"))
   
   # extracting main archive
   install_path <- readline("Set the installation directory, where you would like your 'netMHCpan' directory to reside:")
@@ -38,30 +41,33 @@ GetNetMHCpan <- function() {
   message(paste0("Succesfully uncompressed archive to ", install_path))
   
   # setting netMHCpan script up
-  netmhcpan_file <- readLines(paste0(install_path, "/netMHCpan-4.1/netMHCpan"))
-  netmhcpan_file[14] <- paste0("setenv NMHOME ", install_path, "/netMHCpan-4.1")
-  tmpdir_path_default <- paste0(install_path, "/netMHCpan-4.1/tmp/")
-  tmpdir_path <- readline(paste0("Set a directory for temporary files, used by netMHCpan (for default press <ENTER>: ", install_path, "/netMHCpan-4.1/tmp/)"))
+  sw_name <- paste0("netMHCpan-", version_number)
+  netmhcpan_file <- readLines(paste0(install_path, "/", sw_name, "/netMHCpan"))
+  netmhcpan_file[14] <- paste0("setenv NMHOME ", install_path, "/", sw_name)
+  tmpdir_path_default <- paste0(install_path, "/", sw_name, "/tmp/")
+  tmpdir_path <- readline(paste0("Set a directory for temporary files, used by netMHCpan (for default press <ENTER>: ", install_path, "/", sw_name, "/tmp/)"))
   tmpdir_path <- ifelse(tmpdir_path == "", tmpdir_path_default, tmpdir_path)
   suppressWarnings(dir.create(tmpdir_path, recursive = T))
   netmhcpan_file[19] <- paste0("	setenv  TMPDIR  ", tmpdir_path)
-  write(netmhcpan_file, file = paste0(install_path, "/netMHCpan-4.1/netMHCpan"))
+  write(netmhcpan_file, file = paste0(install_path, "/", sw_name, "/netMHCpan"))
   
   # downloading and extracting data archive
-  message("Downloading and uncompressing data needed by netMHCpan 4.1")
-  download.file("https://services.healthtech.dtu.dk/services/NetMHCpan-4.1/data.tar.gz", destfile = paste0(install_path, "/netMHCpan-4.1/data.tar.gz"))
-  system(paste0("tar -xf ", install_path, "/netMHCpan-4.1/data.tar.gz -C ", install_path, "/netMHCpan-4.1/"))
-  file.remove(paste0(install_path, "/netMHCpan-4.1/data.tar.gz"))
+  message(paste0("Downloading and uncompressing data needed by netMHCpan ", version_number))
+  download.file(paste0("https://services.healthtech.dtu.dk/services/NetMHCpan-", version_number, "/data.tar.gz"),
+                destfile = paste0(install_path, "/netMHCpan-", version_number, "/data.tar.gz"))
+  system(paste0("tar -xf ", install_path, "/netMHCpan-", version_number, "/data.tar.gz -C ",
+                install_path, "/", sw_name))
+  file.remove(paste0(install_path, "/", sw_name, "/data.tar.gz"))
   
   # running test
   message("Performing prediction on a test file")
-  resfile_crnt <- system(paste0(install_path, "/netMHCpan-4.1/netMHCpan -p ", install_path, "/netMHCpan-4.1/test/test.pep"), intern = T)
-  resfile_test <- readLines(paste0(install_path, "/netMHCpan-4.1/test/test.pep.out"))
+  resfile_crnt <- system(paste0(install_path, "/", sw_name, "/netMHCpan -p ", install_path, "/", sw_name, "/test/test.pep"), intern = T)
+  resfile_test <- readLines(paste0(install_path, "/", sw_name, "/test/test.pep.out"))
   
   same_output_lgl <- all(resfile_crnt[48:(length(resfile_crnt)-5)] == resfile_test[48:(length(resfile_test)-5)])
   if(same_output_lgl) {
-    message("Test passed. Successfully installed netMHCpan 4.1!")
+    message("Test passed. Successfully installed netMHCpan ", version_number, "!")
   } else {
-    message("Test and installation of netMHCpan 4.1 failed!")
+    message("Test and installation of netMHCpan ", version_number, " failed!")
   }
 }
