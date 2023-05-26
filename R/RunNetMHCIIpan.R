@@ -26,10 +26,15 @@ RunNetMHCIIpan <- function(alleles,
                            value_type = c("Score_EL", "Rank_EL", "Score_BA", "Rank_BA", "Aff_nm"),
                            output_format = "long",
                            threads = 1,
+                           version_number = "4.0",
                            result_files_location = NULL,
                            keep_pep = FALSE,
                            software_path = NULL,
                            tmppep_loc = NULL) {
+  
+  if (!version_number %in% c("4.0", "4.2")) {
+    stop("the version number of NetMHCIIpan is either not inputed as a string or is not supported. Make sure to use either NetMHCIIpan 4.0 or 4.2.")
+  }
   
   # removing asterisks from allele names
   # asterisk-containing allele names are being misinterpreted by bash
@@ -52,7 +57,13 @@ RunNetMHCIIpan <- function(alleles,
   }
   
   # filtering for valid alleles (only if it is not a paired analysis)
-  alleles_supported <- unlist(strsplit(readLines(paste0(c(software_path_splt[-length(software_path_splt)], "data", "allelelist.txt"), collapse = "/")), "\t"))
+  if (version_number == "4.0") {
+    spltchar <- "\t"
+  } else if (version_number == "4.2") {
+    spltchar <- " "
+  }
+  
+  alleles_supported <- unlist(strsplit(readLines(paste0(c(software_path_splt[-length(software_path_splt)], "data", "allelelist.txt"), collapse = "/")), spltchar))
   if(!paired_input) {
     is_valid_allele <- alleles %in% alleles_supported
     invalid_alleles <- alleles[!is_valid_allele]
@@ -66,10 +77,10 @@ RunNetMHCIIpan <- function(alleles,
   # filtering for supported output value types
   bvaltypes_unsupported <- setdiff(value_type, c("Score_EL", "Rank_EL", "Score_BA", "Rank_BA", "Aff_nm"))
   if(!is.null(value_type) & all(value_type %in% bvaltypes_unsupported)) {
-    msg <- "None of the binding value types are supported by netMHCIIpan 4.0."
+    msg <- "None of the binding value types are supported by netMHCIIpan."
     stop(msg)
   } else if (length(bvaltypes_unsupported) > 0) {
-    msg <- paste0("The following binding value types are not supported by netMHCIIpan 4.0, they will be skipped: ",
+    msg <- paste0("The following binding value types are not supported by netMHCIIpan, they will be skipped: ",
                   paste0(bvaltypes_unsupported, collapse = ", "))
     warning(msg)
   }
@@ -130,14 +141,16 @@ RunNetMHCIIpan <- function(alleles,
       suppressWarnings(outlist <- purrr::imap(peptides_per_alleles, ~RunNetMHCIIpan(alleles = .y, peptides = .x,
                                                                                     value_type = value_type, output_format = output_format,
                                                                                     result_files_location = result_files_location,
-                                                                                    threads = 1, keep_pep = keep_pep, software_path = software_path,
+                                                                                    threads = 1, version_number = version_number,
+                                                                                    keep_pep = keep_pep, software_path = software_path,
                                                                                     tmppep_loc = tmppep_loc)))
     } else {
       future::plan(multisession, workers = threads)
       suppressWarnings(outlist <- furrr::future_imap(peptides_per_alleles, ~RunNetMHCIIpan(alleles = .y, peptides = .x,
                                                                                          value_type = value_type, output_format = output_format,
                                                                                          result_files_location = result_files_location,
-                                                                                         threads = 1, keep_pep = keep_pep, software_path = software_path,
+                                                                                         threads = 1, version_number = version_number,
+                                                                                         keep_pep = keep_pep, software_path = software_path,
                                                                                          tmppep_loc = paste0(tmppep_loc, ".", gsub("\\:", "-", .y)))))
       future:::ClusterRegistry("stop")
     }
@@ -153,9 +166,13 @@ RunNetMHCIIpan <- function(alleles,
   if(!paired_input) {write(peptides, file = tmppep_loc)}
   
   # generating commands to run
-  cmds <- sapply(alleles, function(allele) {
-    paste0(software_path, " -inptype 1 -f ", tmppep_loc  ," -BA -a ", allele, sep = "")
-  }, USE.NAMES = F)
+  
+  if (version_number == "4.0") {
+    cmd_scheme <- paste0(software_path, " -inptype 1 -f ", tmppep_loc  ," -BA -a ", sep = "")
+  } else if (version_number == "4.2") {
+    cmd_scheme <- paste0(software_path, " -inptype 1 -f ", tmppep_loc  ," -a ", sep = "")
+  }
+  cmds <- paste0(cmd_scheme, alleles)
   
   # if a result file directory is specified
   if(!is.null(result_files_location)) {
@@ -173,7 +190,7 @@ RunNetMHCIIpan <- function(alleles,
   if(!is.null(value_type)) {
     results <- RunCommand(cmds, threads = threads, intern = T)
     if(!keep_pep) {file.remove(tmppep_loc)} # removing temporary pepfile
-    outobj <- CollectBindingResults(results, value_type = value_type, output_format = output_format, hla_type = 2)
+    outobj <- CollectBindingResults(results, value_type = value_type, output_format = output_format, hla_type = 2, version_number = version_number)
     
     # stroring version number
     predictor.version <- unlist(strsplit(results[[1]][grepl("# NetMHCIIpan version", results[[1]])], " "))

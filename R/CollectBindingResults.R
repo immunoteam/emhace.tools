@@ -18,7 +18,14 @@ CollectBindingResults <- function(results, value_type = c("Score_EL", "Rank_EL",
     datarow_identifier <- "Sequence "
     to_be_trimmed_wb <- " <=WB"
     to_be_trimmed_sb <- " <=SB"
-    coords <- c(2, 3, 5, 8, 9, 11, 13, 12)
+    if(version_number == "4.0") {
+      coords <- c(2, 3, 5, 8, 9, 11, 13, 12)
+      clnms_output <- c("allele", "peptide", "core", "Score_EL", "Rank_EL", "Score_BA", "Rank_BA", "Aff_nm")
+    } else if(version_number == "4.2") {
+      coords <- c(2, 3, 5, 8, 9)
+      clnms_output <- c("allele", "peptide", "core", "Score_EL", "Rank_EL")
+    }
+    
   } else {
     stop("The value of hla_type can be either 1 or 2!")
   }
