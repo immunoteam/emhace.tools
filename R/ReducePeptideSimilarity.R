@@ -1,6 +1,6 @@
 #' @export
 
-ReduceEpitopeSimilarity <- function(epitopes, input_type, similarity = 0.5, threads = 7,
+ReduceEpitopeSimilarity <- function(epitopes, similarity = 0.5, threads = 7,
                                    clustalo_path, using_windows = TRUE, keep_temp = F,
                                    tempdir = getwd(), save_histograms = T, 
                                    verbose = F) {
