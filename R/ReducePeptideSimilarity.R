@@ -26,7 +26,7 @@ ReduceEpitopeSimilarity <- function(epitopes, similarity = 0.5, threads = 7,
   
   message("3 - Reducing similarity... (this may take a while)")
   while (min(dist_matr, na.rm = TRUE) < similarity) {
-    txtProgressBar(0, num, initial = -length(epitopes) + num, width = 2)
+    if(verbose) message("Number of peptides:", length(epitopes))
     wm <- which(dist_matr == min(dist_matr, na.rm = TRUE), arr.ind = TRUE)
     means <- colMeans(dist_matr[,wm[,2]], na.rm = T)
     index <- wm[which.min(means), 2]
