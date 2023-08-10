@@ -30,7 +30,7 @@ GetNetMHCpan <- function(version_number = "4.1") {
   # downloading main archive
   ftplink <- readline("Link from the _e-mail_: ")
   download_page <- rvest::read_html(ftplink)
-  pkg_file <- download_page %>% html_elements("a") %>% html_attr("href") %>% extract(grepl("\\.tar.gz", .))
+  pkg_file <- download_page %>% rvest::html_elements("a") %>% rvest::html_attr("href") %>% extract(grepl("\\.tar.gz", .))
   
   download.file(paste0(ftplink, "/", pkg_file), destfile = paste0(download_path, "/netmhcpan.tar.gz"))
   
