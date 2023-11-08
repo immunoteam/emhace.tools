@@ -24,6 +24,9 @@ CollectBindingResults <- function(results, value_type = c("Score_EL", "Rank_EL",
     } else if(version_number == "4.2") {
       coords <- c(2, 3, 5, 8, 9)
       clnms_output <- c("allele", "peptide", "core", "Score_EL", "Rank_EL")
+    } else if (version_number == "4.3") {
+      coords <- c(2, 3, 5, 9, 10, 12, 13, 14)
+      clnms_output <- c("allele", "peptide", "core", "Score_EL", "Rank_EL", "Score_BA", "Rank_BA", "Aff_nm")
     }
     
   } else {
@@ -54,3 +57,5 @@ CollectBindingResults <- function(results, value_type = c("Score_EL", "Rank_EL",
   
   return(resultsdf)
 }
+
+

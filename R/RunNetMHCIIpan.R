@@ -32,8 +32,8 @@ RunNetMHCIIpan <- function(alleles,
                            software_path = NULL,
                            tmppep_loc = NULL) {
   
-  if (!version_number %in% c("4.0", "4.2")) {
-    stop("the version number of NetMHCIIpan is either not inputed as a string or is not supported. Make sure to use either NetMHCIIpan 4.0 or 4.2.")
+  if (!version_number %in% c("4.0", "4.2", "4.3")) {
+    stop("the version number of NetMHCIIpan is either not inputed as a string or is not supported. Make sure to use a version from the following list: 4.0, 4.2, 4.3.")
   }
   
   # removing asterisks from allele names
@@ -59,7 +59,7 @@ RunNetMHCIIpan <- function(alleles,
   # filtering for valid alleles (only if it is not a paired analysis)
   if (version_number == "4.0") {
     spltchar <- "\t"
-  } else if (version_number == "4.2") {
+  } else if (version_number %in% c("4.2", "4.3")) {
     spltchar <- " "
   }
   
@@ -167,9 +167,10 @@ RunNetMHCIIpan <- function(alleles,
   
   # generating commands to run
   
-  if (version_number == "4.0") {
+  if (version_number %in% c("4.0", "4.3")) {
     cmd_scheme <- paste0(software_path, " -inptype 1 -f ", tmppep_loc  ," -BA -a ", sep = "")
   } else if (version_number == "4.2") {
+    message("NOTE: version 4.2 does not support binding affinity predictions!")
     cmd_scheme <- paste0(software_path, " -inptype 1 -f ", tmppep_loc  ," -a ", sep = "")
   }
   cmds <- paste0(cmd_scheme, alleles)
