@@ -136,7 +136,7 @@ RunNetMHCpan <- function(alleles,
                                                                                   threads = 1, keep_pep = keep_pep, software_path = software_path,
                                                                                   tmppep_loc = tmppep_loc)))
     } else {
-      future::plan(multisession, workers = threads)
+      future::plan("multisession", workers = threads)
       suppressWarnings(outlist <- furrr::future_imap(peptides_per_alleles, ~RunNetMHCpan(alleles = .y, peptides = .x,
                                                                                          value_type = value_type, output_format = output_format,
                                                                                          version_number = version_number,
