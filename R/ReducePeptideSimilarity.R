@@ -2,8 +2,7 @@
 
 ReduceEpitopeSimilarity <- function(epitopes, similarity = 0.5, threads = 7,
                                    clustalo_path, using_windows = TRUE, keep_temp = F,
-                                   tempdir = getwd(), save_histograms = T, 
-                                   verbose = F) {
+                                   tempdir = getwd(), save_histograms = T) {
   strings <- as.vector(rbind(paste0(">", epitopes), epitopes))
   writeLines(strings, "epitopes.fasta")
   
@@ -50,7 +49,3 @@ ReduceEpitopeSimilarity <- function(epitopes, similarity = 0.5, threads = 7,
   print(g)
   return(epitopes)
 }
-
-# TEST
-# out <- sapply(1:1000, function(x) sample(rownames(protr::AABLOSUM62), 9, replace = FALSE) %>% paste0(collapse = ""))
-# ReduceEpitopeSimilarity(out, clustalo_path = "clustalo")
