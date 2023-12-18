@@ -1,5 +1,3 @@
-#' @export
-
 ### RunCommand
 ### starts commands (stored in a character vector) on one or multiple threads
 
