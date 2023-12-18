@@ -1,5 +1,3 @@
-#' @export
-
 # UNDER CONSTRUCTION!
 # changes to RunNetMHCpan:
 # 1. adding scan_peptides mode (mhcflurry-predict-scan)
