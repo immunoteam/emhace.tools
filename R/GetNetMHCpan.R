@@ -53,11 +53,19 @@ GetNetMHCpan <- function(version_number = "4.1") {
   
   # downloading and extracting data archive
   message(paste0("Downloading and uncompressing data needed by netMHCpan ", version_number))
-  download.file(paste0("https://services.healthtech.dtu.dk/services/NetMHCpan-", version_number, "/data.tar.gz"),
-                destfile = paste0(install_path, "/netMHCpan-", version_number, "/data.tar.gz"))
-  system(paste0("tar -xf ", install_path, "/netMHCpan-", version_number, "/data.tar.gz -C ",
-                install_path, "/", sw_name))
-  file.remove(paste0(install_path, "/", sw_name, "/data.tar.gz"))
+  if(version_number == "4.0") {
+    download.file(paste0("https://services.healthtech.dtu.dk/services/NetMHCpan-", version_number, "/data.Linux.tar.gz"),
+                  destfile = paste0(install_path, "/netMHCpan-", version_number, "/data.tar.gz"))
+    system(paste0("tar -xf ", install_path, "/netMHCpan-", version_number, "/data.tar.gz -C ",
+                  install_path, "/", sw_name))
+    file.remove(paste0(install_path, "/", sw_name, "/data.tar.gz"))
+  } else if(version_number == "4.1") {
+    download.file(paste0("https://services.healthtech.dtu.dk/services/NetMHCpan-", version_number, "/data.tar.gz"),
+                  destfile = paste0(install_path, "/netMHCpan-", version_number, "/data.tar.gz"))
+    system(paste0("tar -xf ", install_path, "/netMHCpan-", version_number, "/data.tar.gz -C ",
+                  install_path, "/", sw_name))
+    file.remove(paste0(install_path, "/", sw_name, "/data.tar.gz"))
+  }
   
   # running test
   message("Performing prediction on a test file")
