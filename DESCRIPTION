@@ -20,4 +20,5 @@ Imports:
     stringr,
     data.table,
     protr,
+    reshape2,
     rvest
