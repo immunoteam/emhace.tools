@@ -166,7 +166,6 @@ RunNetMHCIIpan <- function(alleles,
   if(!paired_input) {write(peptides, file = tmppep_loc)}
   
   # generating commands to run
-  
   if (version_number %in% c("4.0", "4.3")) {
     cmd_scheme <- paste0(software_path, " -inptype 1 -f ", tmppep_loc  ," -BA -a ", sep = "")
   } else if (version_number == "4.2") {
