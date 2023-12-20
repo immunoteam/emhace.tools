@@ -1,25 +1,4 @@
 #' @export
-# THE MAJOR STEPS
-# 1. Keeping valid peptides
-# 2. Keeping valid alleles
-# 3. Keeping valid output value types
-# 4. Keeping valid number of threads
-# 5. Doing paired analysis, if asked
-# 5.1 Forcing long format
-# 5.2 Checking for allele and peptide vector lengths
-# 5.3 Keeping only valid allele-peptide pairs
-# 5.4 Collecting peptides per alleles in a list format
-# 5.5 Running RunNetMHCpan function on the peptide subsets per alleles
-# 5.6 Assessing the outputs
-
-# 6. Writing temporary pepfile to its location
-# 7. Generating commands to be run
-# 8. Modifying commands before running
-# 9. Running the predictions
-# 9.a Getting back results into R
-# 9.b Just running NetMHCpan 4.1 and leaving the result files
-# 10. Notifying the user about the successful run
-
 RunNetMHCIIpan_ng <- function(alleles,
                               peptides,
                               paired_input = F,
