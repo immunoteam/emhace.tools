@@ -3,7 +3,7 @@
 ### GetNetMHCIIpan function
 ### helps in fethching, installation and configuration of netMHCIIpan
 
-GetNetMHCIIpan <- function() {
+GetNetMHCIIpan <- function(version_number = "4.3") {
   # checking if the user performed the function call from Linux
   if(Sys.info()['sysname'] != "Linux") {
     stop("Installation is only available on Linux systems!")
@@ -21,7 +21,7 @@ GetNetMHCIIpan <- function() {
   suppressWarnings(dir.create(download_path, recursive = T))
   
   # opening browser to fill in the form
-  message("On the webpage appearing soon please choose netMHCIIpan 4.0 for download, and fill in the form!")
+  message("On the webpage appearing soon please choose netMHCIIpan for download, and fill in the form!")
   message("Please use your institutional e-mail adress for registration! You will get a link to an FTP repository in an e-mail.")
   message("When you receive your e-mail, paste the link from the mail in this console below!")
   readline("Press <ENTER> to open the download website")
@@ -30,6 +30,13 @@ GetNetMHCIIpan <- function() {
   # downloading main archive
   ftplink <- readline("Link from the _e-mail_: ")
   download.file(paste0(ftplink, "/netMHCIIpan-4.0.Linux.tar.gz"), destfile = paste0(download_path, "/netmhcIIpan.tar.gz"))
+  
+  # downloading main archive
+  ftplink <- readline("Link from the _e-mail_: ")
+  download_page <- rvest::read_html(ftplink)
+  pkg_file <- download_page %>% rvest::html_elements("a") %>% rvest::html_attr("href") %>% extract(grepl("\\.tar.gz", .))
+  
+  download.file(paste0(ftplink, "/", pkg_file), destfile = paste0(download_path, "/netmhcpan.tar.gz"))
   
   # extracting main archive
   install_path <- readline("Set the installation directory, where you would like your 'netMHCIIpan' directory to reside:")
@@ -46,13 +53,7 @@ GetNetMHCIIpan <- function() {
   suppressWarnings(dir.create(tmpdir_path, recursive = T))
   netmhcpan_file[19] <- paste0("	setenv  TMPDIR  ", tmpdir_path)
   write(netmhcpan_file, file = paste0(install_path, "/netMHCIIpan-4.0/netMHCIIpan"))
-  
-  # downloading and extracting data archive
-  message("Downloading and uncompressing data needed by netMHCIIpan-4.0")
-  download.file("https://services.healthtech.dtu.dk/services/NetMHCIIpan-4.0/data.tar.gz", destfile = paste0(install_path, "/netMHCIIpan-4.0/data.tar.gz"))
-  system(paste0("tar -xf ", install_path, "/netMHCIIpan-4.0/data.tar.gz -C ", install_path, "/netMHCIIpan-4.0/"))
-  file.remove(paste0(install_path, "/netMHCIIpan-4.0/data.tar.gz"))
-  
+
   # running test
   message("Performing prediction on a test file")
   resfile_crnt <- system(paste0(install_path, "/netMHCIIpan-4.0/netMHCIIpan -inptype 1 -f ", install_path, "/netMHCIIpan-4.0/test/example.pep"), intern = T)
