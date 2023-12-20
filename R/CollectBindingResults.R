@@ -51,11 +51,10 @@ CollectBindingResults <- function(results, value_type = c("Score_EL", "Rank_EL",
   
   # create wide format
   if(output_format == "wide"){
-    resultsdf <- lapply(value_type, function(x) reshape2::acast(resultsdf, allele ~ peptide, value.var = x, fun.aggregate = sum))
+    resultsdf <- lapply(value_type, function(x) reshape2::acast(resultsdf, allele ~ peptide, value.var = x, fun.aggregate = \(x) x[1]))
     names(resultsdf) <- value_type
   }
   
   return(resultsdf)
 }
-
 
