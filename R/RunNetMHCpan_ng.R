@@ -34,6 +34,7 @@ RunNetMHCpan_ng <- function(alleles,
     invalid_peptides <- peptides[!is_valid]
     
     peptides <- peptides[is_valid]
+    peptides <- unique(peptides)
     if(length(invalid_peptides) > 0) {
       msg <- paste("Skipped the following invalid peptides:", paste0(invalid_peptides, collapse = ", "))
       message(msg)
