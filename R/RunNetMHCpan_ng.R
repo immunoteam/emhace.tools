@@ -122,7 +122,7 @@ RunNetMHCpan_ng <- function(alleles,
     inputdf <- data.frame(tmppep_paths, alleles = map_chr(strsplit(tmppep_paths, "\\."), ~tail(.x, 2)[1]))
   } else if(!paired_input) {
     # creating pepfiles
-    thread_column <- ifelse(threads > 1, cut(seq_along(peptides), threads, labels = FALSE), 1)
+    if(threads > 1) {thread_column <- cut(seq_along(peptides), threads, labels = FALSE)} else {thread_column <- 1}
     peptides_per_threads <- data.frame(peptides, thread = thread_column)
     tmppep_paths <- purrr::map_chr(1:threads, function(.x) {
       crnt_path <- paste0(tmppep_loc, ".", .x)
