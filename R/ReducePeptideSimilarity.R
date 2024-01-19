@@ -2,7 +2,7 @@
 
 ReduceEpitopeSimilarity <- function(epitopes, similarity = 0.5, threads = 7,
                                    clustalo_path, using_windows = TRUE, keep_temp = F,
-                                   tempdir = getwd(), save_histograms = T) {
+                                   tempdir = getwd(), save_histograms = T, verbose = TRUE) {
   strings <- as.vector(rbind(paste0(">", epitopes), epitopes))
   writeLines(strings, "epitopes.fasta")
   
