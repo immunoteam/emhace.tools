@@ -25,6 +25,8 @@ CollectBindingResults <- function(results, value_type = c("Score_EL", "Rank_EL",
       coords <- c(2, 3, 5, 8, 9)
       clnms_output <- c("allele", "peptide", "core", "Score_EL", "Rank_EL")
     } else if (version_number == "4.3") {
+      to_be_trimmed_wb <- " <= WB"
+      to_be_trimmed_sb <- " <= SB"
       coords <- c(2, 3, 5, 9, 10, 12, 13, 14)
       clnms_output <- c("allele", "peptide", "core", "Score_EL", "Rank_EL", "Score_BA", "Rank_BA", "Aff_nm")
     }
