@@ -12,7 +12,7 @@ RunNetMHCIIpan_ng <- function(alleles,
   
   # checking whether version number is correct
   if (!version_number %in% c("4.0", "4.2", "4.3")) {
-    stop("the version number of NetMHCIIpan is either not inputed as a string or is not supported. Make sure to use a version from the following list: 4.0, 4.2, 4.3.")
+    stop("the version number of NetMHCIIpan is either not inputed as a string or is not supported. Make sure to use a version from the following list: 4.0, 4.3.")
   }
   
   # removing asterisks from allele names
@@ -127,13 +127,6 @@ RunNetMHCIIpan_ng <- function(alleles,
   }
   
   # adding commands and threads to inputdf
-  if (version_number %in% c("4.0", "4.3")) {
-    cmd_scheme <- paste0(software_path, " -inptype 1 -f ", tmppep_loc  ," -BA -a ", sep = "")
-  } else if (version_number == "4.2") {
-    message("NOTE: version 4.2 does not support binding affinity predictions!")
-    cmd_scheme <- paste0(software_path, " -inptype 1 -f ", tmppep_loc  ," -a ", sep = "")
-  }
-  
   inputdf$cmd <- paste0(software_path, " -inptype 1 -f ", inputdf[, 1]," -BA -a ", inputdf[, 2], sep = "")
   inputdf$thread <- map_chr(strsplit(inputdf[, 1], "\\."), ~tail(.x, 1))
   
