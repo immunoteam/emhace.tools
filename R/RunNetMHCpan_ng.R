@@ -120,7 +120,7 @@ RunNetMHCpan_ng <- function(alleles,
     })
     
     # creating inputdf
-    inputdf <- data.frame(tmppep_paths, alleles = map_chr(strsplit(tmppep_paths, "\\."), ~tail(.x, 2)[1]))
+    inputdf <- data.frame(tmppep_paths, alleles = purrr::map_chr(strsplit(tmppep_paths, "\\."), ~tail(.x, 2)[1]))
   } else if(!paired_input) {
     # creating pepfiles
     if(threads > 1) {thread_column <- cut(seq_along(peptides), threads, labels = FALSE)} else {thread_column <- 1}
@@ -138,7 +138,7 @@ RunNetMHCpan_ng <- function(alleles,
   
   # adding commands and threads to inputdf
   inputdf$cmd <- paste0(software_path, " -inptype 1 -f ", inputdf[, 1]," -BA -a ", inputdf[, 2], sep = "")
-  inputdf$thread <- map_chr(strsplit(inputdf[, 1], "\\."), ~tail(.x, 1))
+  inputdf$thread <- purrr::map_chr(strsplit(inputdf[, 1], "\\."), ~tail(.x, 1))
   
   # modifying commands to include result files output location
   if(!is.null(result_files_location)) {
