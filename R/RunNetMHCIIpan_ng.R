@@ -148,7 +148,7 @@ RunNetMHCIIpan_ng <- function(alleles,
     results <- RunCommand(inputdf$cmd, threads = threads, intern = T)
     file.remove(unique(inputdf$tmppep_paths)) # removing temporary pepfiles
     outobj <- CollectBindingResults(results, hla_type = 2, value_type = value_type, output_format = output_format, version_number = version_number)
-    outobj$allele %<>% gsub("\\*", "", .)
+    outobj$allele <- gsub("\\*", "", outobj$allele)
     
     if(paired_input) outobj <- outobj[match(paste0(alleles, ".", peptides), paste0(outobj$allele, ".", outobj$peptide)), ]
     
