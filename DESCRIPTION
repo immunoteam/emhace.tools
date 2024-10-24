@@ -2,7 +2,7 @@ Package: emhace.tools
 Title: A package for user-friendly management of MHC binding prediction runs and results.
 Version: 0.1
 Authors@R: 
-    person("Gergő Mihály", "Balogh", , "gmbalogh@brc.hu", role = c("aut", "cre"),
+    person("Gergő Mihály", "Balogh", , "balogh.gergo@brc.hu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-7583-4980"))
 Description: The package contains functions to get and run MHC binding prediction softwares, as well as processing their outputs. At the moment this library focused on NetMHCpan/NetMHCIIpan.
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
@@ -12,6 +12,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Imports:
     parallel,
+    purrr,
     furrr,
     future,
     magrittr,
