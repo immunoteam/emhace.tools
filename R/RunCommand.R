@@ -7,7 +7,7 @@ RunCommand <- function(cmds, threads = 1, intern = F) {
   } else if (threads > 1) {
     future::plan("multisession", workers = threads)
     out <- furrr::future_map(cmds, ~system(.x, intern = intern))
-    future:::ClusterRegistry("stop")
+    future:::clusterRegistry$stopCluster()
     return(out)
   } else {
     message("Number of threads cannot be smaller than 1.")
