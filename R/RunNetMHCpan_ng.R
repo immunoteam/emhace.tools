@@ -1,14 +1,14 @@
 #' @export
 RunNetMHCpan_ng <- function(alleles,
-                                 peptides,
-                                 paired_input = F,
-                                 value_type = c("Score_EL", "Rank_EL", "Score_BA", "Rank_BA", "Aff_nm"),
-                                 output_format = "long",
-                                 threads = 1,
-                                 version_number = "4.1",
-                                 result_files_location = NULL,
-                                 software_path = NULL,
-                                 tmppep_loc = NULL) {
+                            peptides,
+                            paired_input = F,
+                            value_type = c("Score_EL", "Rank_EL", "Score_BA", "Rank_BA", "Aff_nm"),
+                            output_format = "long",
+                            threads = 1,
+                            version_number = "4.1",
+                            result_files_location = NULL,
+                            software_path = NULL,
+                            tmppep_loc = NULL) {
   
   # checking whether version number is correct
   if (!version_number %in% c("4.0", "4.1")) {
@@ -48,6 +48,7 @@ RunNetMHCpan_ng <- function(alleles,
       msg <- "Skipped the following unsupported alleles:"
       message(paste(msg, paste0(invalid_alleles, collapse = ", ")))
     }
+    
   } else {
     # check if wide format was used instead of long
     if(output_format == "wide") {
