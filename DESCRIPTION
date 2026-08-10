@@ -1,6 +1,6 @@
 Package: emhace.tools
 Title: A package for user-friendly management of MHC binding prediction runs and results.
-Version: 0.1
+Version: 0.2
 Authors@R: 
     person("Gergő Mihály", "Balogh", , "balogh.gergo@brc.hu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-7583-4980"))
