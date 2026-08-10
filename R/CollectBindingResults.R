@@ -4,7 +4,10 @@ CollectBindingResults <- function(results, value_type = c("Score_EL", "Rank_EL",
     datarow_identifier <- "PEPLIST "
     to_be_trimmed_wb <- " <= WB"
     to_be_trimmed_sb <- " <= SB"
-    if(version_number == "4.1") {
+    if (version_number == "4.2") {
+      coords <- c(2, 3, 4, 12, 13, 14, 15, 16, 17, 18, 19, 20)
+      clnms_output <- c("allele", "peptide", "core", "Score_EL", "Rank_EL", "Score_BA", "Rank_BA", "Aff_nm", "Score_Pathogen", "Rank_Pathogen", "Score_Neo", "Rank_Neo")
+    } else if(version_number == "4.1") {
       coords <- c(2, 3, 4, 12, 13, 14, 15, 16)
       clnms_output <- c("allele", "peptide", "core", "Score_EL", "Rank_EL", "Score_BA", "Rank_BA", "Aff_nm")
     } else if(version_number == "4.0") {

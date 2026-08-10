@@ -2,7 +2,7 @@
 RunNetMHCpan_ng <- function(alleles,
                             peptides,
                             paired_input = F,
-                            value_type = c("Score_EL", "Rank_EL", "Score_BA", "Rank_BA", "Aff_nm"),
+                            value_type = c("Score_EL", "Rank_EL", "Score_BA", "Rank_BA", "Aff_nm", "Score_Neo", "Rank_Neo", "Score_Pathogen", "Rank_Pathogen"),
                             output_format = "long",
                             threads = 1,
                             version_number = "4.1",
@@ -11,8 +11,8 @@ RunNetMHCpan_ng <- function(alleles,
                             tmppep_loc = NULL) {
   
   # checking whether version number is correct
-  if (!version_number %in% c("4.0", "4.1")) {
-    stop("the version number of NetMHCpan is either not inputed as a string or is not supported. Make sure to use either NetMHCpan 4.0 or 4.1.")
+  if (!version_number %in% c("4.0", "4.1", "4.2")) {
+    stop("the version number of NetMHCpan is either not inputed as a string or is not supported. Make sure to use either NetMHCpan 4.0, 4.1 or 4.2.")
   }
   
   # removing asterisks from allele names
@@ -76,7 +76,9 @@ RunNetMHCpan_ng <- function(alleles,
   }
 
   # filtering for supported output value types
-  if(version_number == "4.1") {
+  if(version_number == "4.2") {
+    bvaltypes_unsupported <- setdiff(value_type, c("Score_EL", "Rank_EL", "Score_BA", "Rank_BA", "Aff_nm", "Score_Neo", "Rank_Neo", "Score_Pathogen", "Rank_Pathogen"))
+  } else if (version_number == "4.1") {
     bvaltypes_unsupported <- setdiff(value_type, c("Score_EL", "Rank_EL", "Score_BA", "Rank_BA", "Aff_nm"))
   } else if (version_number == "4.0") {
     bvaltypes_unsupported <- setdiff(value_type, c("Score_BA", "Rank_BA", "Aff_nm", "Exp"))
@@ -137,8 +139,15 @@ RunNetMHCpan_ng <- function(alleles,
     colnames(inputdf) <- c("tmppep_paths", "alleles")
   }
   
+  # forming a string of parameters for the netMHCpan command adding BA/neo/pathogen predictions
+  if(version_number %in% c("4.0", "4.1")) {
+    extra_output_value_params <- "-BA"
+  } else if(version_number == "4.2") {
+    extra_output_value_params <- "-BA -neo -pathogen"
+  }
+  
   # adding commands and threads to inputdf
-  inputdf$cmd <- paste0(software_path, " -inptype 1 -f ", inputdf[, 1]," -BA -a ", inputdf[, 2], sep = "")
+  inputdf$cmd <- paste0(software_path, " -inptype 1 -f ", inputdf[, 1], " ", extra_output_value_params, " -a ", inputdf[, 2], sep = "")
   inputdf$thread <- purrr::map_chr(strsplit(inputdf[, 1], "\\."), ~tail(.x, 1))
   
   # modifying commands to include result files output location
